@@ -5,26 +5,25 @@ from InputData import HealthStates
 import SimPy.EconEval as Econ
 import SimPy.Statistics as Stat
 
-
 class Patient:
-    def __init__(self, id, parameters):
+    def __init__(self, id, treatment):
         """ initiates a patient
         :param id: ID of the patient
         :param parameters: an instance of the parameters class
         """
         self.id = id
-        self.params = parameters
-        self.stateMonitor = PatientStateMonitor(parameters=parameters)
+        self.treatment = treatment
+        self.stateMonitor = PatientStateMonitor(treatment=treatment)
 
     def simulate(self, n_time_steps):
         """ simulate the patient over the specified simulation length """
+
+        k = 0
 
         # random number generator
         rng = np.random.RandomState(seed=self.id)
         # jump process
         markov_jump = Markov.MarkovJumpProcess(transition_prob_matrix=self.params.probMatrix)
-
-        k = 0  # simulation time step
 
         # while the patient is alive and simulation length is not yet reached
         while self.stateMonitor.get_if_alive() and k < n_time_steps:
@@ -40,14 +39,13 @@ class Patient:
             # increment time
             k += 1
 
-
 class PatientStateMonitor:
     """ to update patient outcomes (years survived, cost, etc.) throughout the simulation """
-    def __init__(self, parameters):
+    def __init__(self, treatment):
 
         self.currentState = parameters.initialHealthState   # initial health state
         self.survivalTime = None      # survival time
-        self.timeToAIDS = None        # time to develop AIDS
+        self.timeToCancer = None        # time to develop AIDS
         # patient's cost and utility monitor
         self.costUtilityMonitor = PatientCostUtilityMonitor(parameters=parameters)
 
@@ -59,12 +57,12 @@ class PatientStateMonitor:
         """
 
         # update survival time
-        if new_state == HealthStates.HIV_DEATH:
+        if new_state == HealthStates.CANCER_DEATH or new_state == HealthStates.OTHER_DEATH:
             self.survivalTime = time_step + 0.5  # corrected for the half-cycle effect
 
         # update time until AIDS
-        if self.currentState != HealthStates.AIDS and new_state == HealthStates.AIDS:
-            self.timeToAIDS = time_step + 0.5  # corrected for the half-cycle effect
+        if self.currentState != HealthStates.CANCER and new_state == HealthStates.CANCER:
+            self.timeToCancer = time_step + 0.5  # corrected for the half-cycle effect
 
         # update cost and utility
         self.costUtilityMonitor.update(k=time_step,
@@ -76,19 +74,18 @@ class PatientStateMonitor:
 
     def get_if_alive(self):
         """ returns true if the patient is still alive """
-        if self.currentState != HealthStates.HIV_DEATH:
+        if self.currentState != HealthStates.CANCER_DEATH and self.currentState != HealthStates.OTHER_DEATH:
             return True
         else:
             return False
 
-
 class PatientCostUtilityMonitor:
 
-    def __init__(self, parameters):
+    def __init__(self, parameters, treatment):
 
         # model parameters for this patient
         self.params = parameters
-
+        self.treatment = treatment
         # total cost and utility
         self.totalDiscountedCost = 0
         self.totalDiscountedUtility = 0
@@ -105,12 +102,14 @@ class PatientCostUtilityMonitor:
                       self.params.annualStateCosts[next_state.value])
 
         # update utility
-        utility = 0.5 * (self.params.annualStateUtilities[current_state.value] +
-                         self.params.annualStateUtilities[next_state.value])
+        # utility = 0.5 * (self.params.annualStateUtilities[current_state.value] +
+        #                  self.params.annualStateUtilities[next_state.value])
 
         # add the cost of treatment
-        # if HIV death will occur, add the cost for half-year of treatment
-        if next_state == HealthStates.HIV_DEATH:
+        cost += self.params.treatmentCost
+
+        # if death will occur, add the cost for half-year of treatment
+        if next_state == HealthStates.CANCER_DEATH or next_state == HealthStates.OTHER_DEATH:
             cost += 0.5 * self.params.annualTreatmentCost
         else:
             cost += 1 * self.params.annualTreatmentCost
@@ -123,9 +122,8 @@ class PatientCostUtilityMonitor:
                                                               discount_rate=self.params.discountRate / 2,
                                                               discount_period=2 * k + 1)
 
-
 class Cohort:
-    def __init__(self, id, pop_size, parameters):
+    def __init__(self, id, pop_size, treatment):
         """ create a cohort of patients
         :param id: cohort ID
         :param pop_size: population size of this cohort
@@ -133,7 +131,7 @@ class Cohort:
         """
         self.id = id
         self.popSize = pop_size
-        self.params = parameters
+        self.treatment = treatment
         self.cohortOutcomes = CohortOutcomes()  # outcomes of the this simulated cohort
 
     def simulate(self, n_time_steps):
@@ -146,7 +144,7 @@ class Cohort:
         for i in range(self.popSize):
             # create a new patient (use id * pop_size + n as patient id)
             patient = Patient(id=self.id * self.popSize + i,
-                              parameters=self.params)
+                              treatment=self.treatment)
             # add the patient to the cohort
             patients.append(patient)
 
@@ -157,7 +155,6 @@ class Cohort:
 
         # store outputs of this simulation
         self.cohortOutcomes.extract_outcomes(simulated_patients=patients)
-
 
 class CohortOutcomes:
     def __init__(self):

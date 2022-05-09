@@ -5,13 +5,11 @@ import Support as Support
 import SimPy.Plots.SamplePaths as Path
 import SimPy.Plots.Histogram as Hist
 
-# selected therapy
-therapy = P.Therapies.MONO
 
 # create a cohort
 myCohort = Cls.Cohort(id=1,
                       pop_size=D.POP_SIZE,
-                      parameters=P.Parameters(therapy=therapy))
+                      Treatment=P.Treatment.HPV_SCREEN)
 
 # simulate the cohort over the specified time steps
 myCohort.simulate(n_time_steps=D.SIM_TIME_STEPS)

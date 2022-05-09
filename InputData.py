@@ -16,8 +16,54 @@ class HealthStates(Enum):
     CANCER_DEATH = 5
     OTHER_DEATH = 6
 
+# treatment relative risk
+HPV_VACC_RR = 0.83
+HPV_SCREEN_RR = 0.9260
+CRYT_SCREEN_RR = 0.7550
+DUAL_SCREEN_RR = 0.9370
+
 # transition matrix
-TRANS_MATRIX = [
+TRANS_MATRIX_NONE = [
+    [0, 0, 0, 0, 0, 0, 0],   # WELL
+    [0, 0, 0, 0, 0, 0, 0],   # HR_HPV
+    [0, 0, 0, 0, 0, 0, 0],   # L_DYSPLASIA
+    [0, 0, 0, 0, 0, 0, 0],   # H_DYSPLASIA
+    [0, 0, 0, 0, 0, 0, 0],   # CANCER
+    [0, 0, 0, 0, 0, 0, 0],   # CANCER_DEATH
+    [0, 0, 0, 0, 0, 0, 0]   # OTHER_DEATH
+    ]
+
+TRANS_MATRIX_VACC = [
+    [0, 0, 0, 0, 0, 0, 0],   # WELL
+    [0, 0, 0, 0, 0, 0, 0],   # HR_HPV
+    [0, 0, 0, 0, 0, 0, 0],   # L_DYSPLASIA
+    [0, 0, 0, 0, 0, 0, 0],   # H_DYSPLASIA
+    [0, 0, 0, 0, 0, 0, 0],   # CANCER
+    [0, 0, 0, 0, 0, 0, 0],   # CANCER_DEATH
+    [0, 0, 0, 0, 0, 0, 0]   # OTHER_DEATH
+    ]
+
+TRANS_MATRIX_HPV = [
+    [0, 0, 0, 0, 0, 0, 0],   # WELL
+    [0, 0, 0, 0, 0, 0, 0],   # HR_HPV
+    [0, 0, 0, 0, 0, 0, 0],   # L_DYSPLASIA
+    [0, 0, 0, 0, 0, 0, 0],   # H_DYSPLASIA
+    [0, 0, 0, 0, 0, 0, 0],   # CANCER
+    [0, 0, 0, 0, 0, 0, 0],   # CANCER_DEATH
+    [0, 0, 0, 0, 0, 0, 0]   # OTHER_DEATH
+    ]
+
+TRANS_MATRIX_CRYT = [
+    [0, 0, 0, 0, 0, 0, 0],   # WELL
+    [0, 0, 0, 0, 0, 0, 0],   # HR_HPV
+    [0, 0, 0, 0, 0, 0, 0],   # L_DYSPLASIA
+    [0, 0, 0, 0, 0, 0, 0],   # H_DYSPLASIA
+    [0, 0, 0, 0, 0, 0, 0],   # CANCER
+    [0, 0, 0, 0, 0, 0, 0],   # CANCER_DEATH
+    [0, 0, 0, 0, 0, 0, 0]   # OTHER_DEATH
+    ]
+
+TRANS_MATRIX_DUAL = [
     [0, 0, 0, 0, 0, 0, 0],   # WELL
     [0, 0, 0, 0, 0, 0, 0],   # HR_HPV
     [0, 0, 0, 0, 0, 0, 0],   # L_DYSPLASIA
@@ -55,9 +101,3 @@ HPV_SCREEN_COST = 117
 CRYT_SCREEN_COST = 98
 DUAL_SCREEN_COST = 142
 COLPOSCOPY_COST = 299
-
-# treatment relative risk
-HPV_VACC_RR = 0.83
-HPV_SCREEN_RR = 0.9260
-CRYT_SCREEN_RR = 0.7550
-DUAL_SCREEN_RR = 0.9370
