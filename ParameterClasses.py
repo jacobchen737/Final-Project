@@ -4,46 +4,29 @@ import InputData as Data
 
 class Treatment(Enum):
     """ mono vs. combination therapy """
-    VACCINE = 0
-    HPV_SCREEN = 1
-    CRYT_SCREEN = 2
-    DUAL_SCREEN = 3
+    HPV_SCREEN = 0
+    CRYT_SCREEN = 1
+    DUAL_SCREEN = 2
 
 class Parameters:
-    def __init__(self, treatment, time):
+    def __init__(self, treatment):
 
         # selected therapy
         self.treatment = treatment
-        self.time = time
 
         # initial health state
         self.initialHealthState = Data.HealthStates.WELL
-        self.probMatrix = []
+        self.transRateMatrix = []
 
-        #  treatment costs & probability matrices
+        #  transition rate matrices
         if self.treatment == Treatment.HPV_SCREEN:
-            if time % 5 == 0:
-                self.treatmentCost = Data.HPV_SCREEN_COST
-                self.probMatrix = Data.TRANS_MATRIX_HPV
-            else:
-                self.treatmentCost = 0
-                self.probMatrix = Data.TRANS_MATRIX_NONE
+            self.transRateMatrix = Data.TRANS_MATRIX_HPV
 
         if self.treatment == Treatment.CRYT_SCREEN:
-            if time % 3 == 0:
-                self.treatmentCost = Data.CRYT_SCREEN_COST
-                self.probMatrix = Data.TRANS_MATRIX_CRYT
-            else:
-                self.treatmentCost = 0
-                self.probMatrix = Data.TRANS_MATRIX_NONE
+            self.transRateMatrix = Data.TRANS_MATRIX_CRYT
 
         if self.treatment == Treatment.DUAL_SCREEN:
-            if time % 5 == 0:
-                self.treatmentCost = Data.DUAL_SCREEN_COST
-                self.probMatrix = Data.TRANS_MATRIX_DUAL
-            else:
-                self.treatmentCost = 0
-                self.probMatrix = Data.TRANS_MATRIX_NONE
+            self.transRateMatrixMatrix = Data.TRANS_MATRIX_DUAL
 
         # annual state costs and utilities
         self.annualStateCosts = Data.ANNUAL_STATE_COST

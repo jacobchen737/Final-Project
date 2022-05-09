@@ -6,8 +6,9 @@ SIM_TIME_STEPS = 100    # length of simulation (years)
 ALPHA = 0.05        # significance level for calculating confidence intervals
 DISCOUNT = 0.03     # annual discount rate
 
+ANNUAL_PROB_BACKGROUND_MORT = 8.15 / 1000
+
 class HealthStates(Enum):
-    """ health states of patients with HIV """
     WELL = 0
     HR_HPV = 1
     L_DYSPLASIA = 2
@@ -17,31 +18,9 @@ class HealthStates(Enum):
     OTHER_DEATH = 6
 
 # treatment relative risk
-HPV_VACC_RR = 0.83
 HPV_SCREEN_RR = 0.9260
 CRYT_SCREEN_RR = 0.7550
 DUAL_SCREEN_RR = 0.9370
-
-# transition matrix
-TRANS_MATRIX_NONE = [
-    [0, 0, 0, 0, 0, 0, 0],   # WELL
-    [0, 0, 0, 0, 0, 0, 0],   # HR_HPV
-    [0, 0, 0, 0, 0, 0, 0],   # L_DYSPLASIA
-    [0, 0, 0, 0, 0, 0, 0],   # H_DYSPLASIA
-    [0, 0, 0, 0, 0, 0, 0],   # CANCER
-    [0, 0, 0, 0, 0, 0, 0],   # CANCER_DEATH
-    [0, 0, 0, 0, 0, 0, 0]   # OTHER_DEATH
-    ]
-
-TRANS_MATRIX_VACC = [
-    [0, 0, 0, 0, 0, 0, 0],   # WELL
-    [0, 0, 0, 0, 0, 0, 0],   # HR_HPV
-    [0, 0, 0, 0, 0, 0, 0],   # L_DYSPLASIA
-    [0, 0, 0, 0, 0, 0, 0],   # H_DYSPLASIA
-    [0, 0, 0, 0, 0, 0, 0],   # CANCER
-    [0, 0, 0, 0, 0, 0, 0],   # CANCER_DEATH
-    [0, 0, 0, 0, 0, 0, 0]   # OTHER_DEATH
-    ]
 
 TRANS_MATRIX_HPV = [
     [0, 0, 0, 0, 0, 0, 0],   # WELL
