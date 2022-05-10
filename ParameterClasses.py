@@ -16,20 +16,29 @@ class Parameters:
 
         # initial health state
         self.initialHealthState = Data.HealthStates.WELL
-        self.transRateMatrix = []
-
-        #  transition rate matrices
-        if self.treatment == Treatment.HPV_SCREEN:
-            self.transRateMatrix = Data.TRANS_MATRIX_HPV
-
-        if self.treatment == Treatment.CRYT_SCREEN:
-            self.transRateMatrix = Data.TRANS_MATRIX_CRYT
-
-        if self.treatment == Treatment.DUAL_SCREEN:
-            self.transRateMatrixMatrix = Data.TRANS_MATRIX_DUAL
-
         # annual state costs and utilities
         self.annualStateCosts = Data.ANNUAL_STATE_COST
 
         # discount rate
         self.discountRate = Data.DISCOUNT
+
+        self.transRateMatrix = []
+
+        #  transition rate matrices
+        if self.treatment == Treatment.HPV_SCREEN:
+            self.transRateMatrix = Data.TRANS_MATRIX_HPV
+            self.annualStateCosts[1] = Data.HPV_SCREEN_COST
+            self.annualStateCosts[3] = Data.HPV_SCREEN_COST
+            self.annualStateCosts[6] = Data.HPV_SCREEN_COST
+
+        if self.treatment == Treatment.CRYT_SCREEN:
+            self.transRateMatrix = Data.TRANS_MATRIX_CRYT
+            self.annualStateCosts[1] = Data.CRYT_SCREEN_COST
+            self.annualStateCosts[3] = Data.CRYT_SCREEN_COST
+            self.annualStateCosts[6] = Data.CRYT_SCREEN_COST
+
+        if self.treatment == Treatment.DUAL_SCREEN:
+            self.transRateMatrixMatrix = Data.TRANS_MATRIX_DUAL
+            self.annualStateCosts[1] = Data.DUAL_SCREEN_COST
+            self.annualStateCosts[3] = Data.DUAL_SCREEN_COST
+            self.annualStateCosts[6] = Data.DUAL_SCREEN_COST
