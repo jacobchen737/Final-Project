@@ -34,8 +34,16 @@ ANNUAL_STATE_COST_SCREENING = [
     0,      #PRE_CANCER_SCREENING (cost of HPV or Cyt)
     0,      #PRE_CANCER_TREATMENT
     56250,   #CANCER
-
-
+    1700, #CANCERTREATMENT
+    0,     #CANCER_DEATH
+    0     #OTHER_DEATH
+]
+ANNUAL_STATE_COST_NOSCREENING = [
+    0,      #WELL
+    56250,  #CANCER
+    1700,   #CANCER_TREAMENT
+    0,      #CANCER_DEATH
+    0       #OTHER_DEATH
 ]
 # treatment sensitivity
 HPV_SCREEN_RR = 0.9260
@@ -60,11 +68,20 @@ HPV_SCREEN_FREQUENCY = 1/5
 CRYT_SCREEN_FREQUENCY = 1/3
 DUAL_SCREEN_FREQUENCY = 1/5
 
-def get trans_rate_matrix(treatment):
- """
- :param with_treatment: to calculate the transition matrix when screening is implemented
- :return: transition rate matrix
- """
+def get trans_rate_matrix(with_screening):
+    """
+:param with_screening: to calculate the transition matrix when screening is implemented
+:return: transition rate matrix
+    """
+ if with_screening == Treatment.HPV_SCREEN:
+     lambda13 = 1/HPV_SCREEN_FREQUENCY
+     rr = 1-HPV_SCREEN_RR
+ if with_screening == Treatment.CRYT_SCREEN:
+     lambda13 = 1/CRYT_SCREEN_FREQUENCY
+     rr = 1 - CRYT_SCREEN_RR
+ if with_screening == Treatment.DUAL_SCREEN:
+     lambda13 = 1/DUAL_SCREEN_FREQUENCY
+     rr = 1 - DUAL_SCREEN_RR
 
 # Part 1: find the annual rate of non-cervical-cancer death
 annual_prob_non_cervicalcancer_mort = (ANNUAL_PROB_ALL_CAUSE_MORT - ANNUAL_PROB_CERVICALCANCER_MORT)
@@ -92,6 +109,7 @@ lambda6 = (1/SCREEN_DURATION)*lambda1
 lambda7 = (1/SCREEN_DURATION)*lambda2
 
 # Part 9 WELL -> WELL
+
 lambda8 = -np.log(1-PROB_WELL_WELL)
 
 #Part 10 WELLSCREENING -> WELL
@@ -105,6 +123,51 @@ lambda11 = (1/SCREEN_DURATION)*lambda3
 
 # Part 13 CANCERTREATMENT -> CANCER
 lambda12 = 1/CANCERTREATMENT_DURATION
+
+if with_screening == Treatment.NONE:
+    rate_matrix = [
+        [0, lambda2, 0, 0, lambda0], #WELL
+        [0,0,lambda12, 0, 0],   #CANCER TREATMENT
+        [0,0,0,lambda5, 0],     #CANCER
+        [0,0,0,0,0],            #CANCER_DEATH
+        [0,0,0,0,0],            #OTHER_DEATH
+    ]
+
+else:
+    rate_matrix = [
+        [0, lambda13, lambda1, 0, 0, lambda2, 0, 0, lambda0],
+        [0, lambda13, lambda1, 0, 0, lambda2, 0, 0, lambda0],  # WELL
+        [lambda9/rr, 0, 0, lambda6*rr, 0, 0, lambda7*rr, 0, lambda0*(1 / SCREEN_DURATION)*rr], # WELL_SCREENING
+        [0, 0, 0, 0, lambda13, lambda4, 0, 0, lambda0],  # PRE_CANCER
+        [0, 0, 0, 0, lambda11/rr, 0, lambda10*rr, 0, lambda0*(1/SCREEN_DURATION)*rr],  # PRE_CANCER_SCREENING
+        [lambda3, 0, 0, 0, 0, 0, 0, 0, lambda0*(1/PRECANCERTREATMENT_DURATION)],  # PRE_CANCER_TREATMENT
+        [0, 0, 0, 0, 0, 0, 0, lambda5, 0],  # CANCER
+        [0, 0, 0, 0, 0, lambda12, 0, 0, 0],  # CANCER_TREATMENT
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],  # CANCER_DEATH
+        [0, 0, 0, 0, 0, 0, 0, 0, 0]  # OTHER_DEATH
+    ]
+    return rate_matrix
+
+# annual health utility of each health state
+ANNUAL_STATE_UTILITY = [
+     1,  # WELL
+     0,  # WELL_SCREENING
+     0.9,  # PRE_CANCER
+     0,  # PRE_CANCER_SCREENING
+     0,  # PRE_CANCER_TREATMENT (cost of colposcopy)
+     0.2,  # CANCER
+     0.2,  # CANCER_TREATMENT
+     0,  # CANCER_DEATH
+     0  # OTHER_DEATH
+ ]
+
+# treatment costs
+HPV_SCREEN_COST = 117
+CRYT_SCREEN_COST = 98
+DUAL_SCREEN_COST = 142
+CANCER_TREATMENT_COST = 1702
+PRECANCER_TREATMENT_COST = 299
+
 
 
 
