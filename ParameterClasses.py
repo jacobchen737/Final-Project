@@ -2,11 +2,6 @@ from enum import Enum
 import numpy as np
 import InputData as Data
 
-class Treatment(Enum):
-    """ mono vs. combination therapy """
-    HPV_SCREEN = 0
-    CRYT_SCREEN = 1
-    DUAL_SCREEN = 2
 
 class Parameters:
     def __init__(self, treatment):
@@ -17,28 +12,31 @@ class Parameters:
         # initial health state
         self.initialHealthState = Data.HealthStates.WELL
         # annual state costs and utilities
-        self.annualStateCosts = Data.ANNUAL_STATE_COST
+        if self.treatment == Data.Treatment.NONE:
+            self.annualStateCosts = Data.ANNUAL_STATE_COST_NOSCREENING
+        else:
+            self.annualStateCosts = Data.ANNUAL_STATE_COST_SCREENING
 
         # discount rate
         self.discountRate = Data.DISCOUNT
 
         self.transRateMatrix = []
+        self.transRateMatrix = Data.get_trans_rate_matrix(with_treatment=treatment)
 
         #  transition rate matrices
-        if self.treatment == Treatment.HPV_SCREEN:
-            self.transRateMatrix = Data.TRANS_MATRIX_HPV
-            self.annualStateCosts[1] = Data.HPV_SCREEN_COST
-            self.annualStateCosts[3] = Data.HPV_SCREEN_COST
-            self.annualStateCosts[6] = Data.HPV_SCREEN_COST
+        if self.treatment == Data.Treatment.HPV_SCREEN:
+            self.annualStateCosts[Data.HealthStates.WELL_SCREENING.value] = Data.HPV_SCREEN_COST
+            self.annualStateCosts[Data.HealthStates.PRE_CANCER_SCREENING.value] = Data.HPV_SCREEN_COST
 
-        if self.treatment == Treatment.CRYT_SCREEN:
-            self.transRateMatrix = Data.TRANS_MATRIX_CRYT
-            self.annualStateCosts[1] = Data.CRYT_SCREEN_COST
-            self.annualStateCosts[3] = Data.CRYT_SCREEN_COST
-            self.annualStateCosts[6] = Data.CRYT_SCREEN_COST
+        if self.treatment == Data.Treatment.CRYT_SCREEN:
+            self.annualStateCosts[Data.HealthStates.WELL_SCREENING.value] = Data.CRYT_SCREEN_COST
+            self.annualStateCosts[Data.HealthStates.PRE_CANCER_SCREENING.value] = Data.CRYT_SCREEN_COST
 
-        if self.treatment == Treatment.DUAL_SCREEN:
-            self.transRateMatrixMatrix = Data.TRANS_MATRIX_DUAL
-            self.annualStateCosts[1] = Data.DUAL_SCREEN_COST
-            self.annualStateCosts[3] = Data.DUAL_SCREEN_COST
-            self.annualStateCosts[6] = Data.DUAL_SCREEN_COST
+        if self.treatment == Data.Treatment.DUAL_SCREEN:
+            self.annualStateCosts[Data.HealthStates.WELL_SCREENING.value] = Data.DUAL_SCREEN_COST
+            self.annualStateCosts[Data.HealthStates.PRE_CANCER_SCREENING.value] = Data.DUAL_SCREEN_COST
+
+        self.annualStateUtilities = Data.ANNUAL_STATE_UTILITY
+
+        self.cancerTreatmentCost = Data.CANCER_TREATMENT_COST
+        self.precancerTreatmentCost = Data.PRECANCER_TREATMENT_COST

@@ -7,16 +7,12 @@ from InputData import HealthStates
 
 class Patient:
     def __init__(self, id, parameters):
-        """ initiates a patient
-        :param id: ID of the patient
-        :param parameters: an instance of the parameters class
-        """
+
         self.id = id
         self.params = parameters
-        self.stateMonitor = PatientStateMonitor(parameters=parameters)  # patient state monitor
+        self.stateMonitor = PatientStateMonitor(parameters=parameters)
 
     def simulate(self, sim_length):
-        """ simulate the patient over the specified simulation length """
 
         # random number generator for this patient
         rng = np.random.RandomState(seed=self.id)
@@ -54,71 +50,59 @@ class Patient:
 
 
 class PatientStateMonitor:
-    """ to update patient outcomes (years survived, cost, etc.) throughout the simulation """
     def __init__(self, parameters):
 
-        self.currentState = parameters.initialHealthState   # initial health state
-        self.survivalTime = None      # survival time
-        self.timeToCancer = None        # time to develop Cancer
-        self.nCancer = 0
-        # patient's cost and utility monitor
+        self.currentState = parameters.initialHealthState    # assuming everyone starts in "Well"
+        self.survivalTime = None
+        #self.nStrokes = 0
         self.costUtilityMonitor = PatientCostUtilityMonitor(parameters=parameters)
 
     def update(self, time, new_state):
-        """
-        update the current health state to the new health state
-        :param time: current time
-        :param new_state: new state
-        """
 
-        # update survival time
         if new_state in (HealthStates.CANCER_DEATH, HealthStates.OTHER_DEATH):
             self.survivalTime = time
 
-        # update time until Cancer
-        if self.currentState != HealthStates.CANCER and new_state == HealthStates.CANCER:
-            self.timeToCancer = time
 
-        #update Cancer count
-        if new_state == HealthStates.CANCER:
-            self.nCancer +=1
-
-        # update cost and utility
         self.costUtilityMonitor.update(time=time,
                                        current_state=self.currentState,
-                                       new_state=new_state)
+                                       next_state=new_state)
 
-        # update current health state
         self.currentState = new_state
+
+    def get_if_alive(self):
+        if self.currentState in (HealthStates.CANCER_DEATH, HealthStates.OTHER_DEATH):
+            return False
+        else:
+            return True
 
 
 class PatientCostUtilityMonitor:
-
     def __init__(self, parameters):
 
         self.tLastRecorded = 0  # time when the last cost and outcomes got recorded
 
-        # model parameters for this patient
         self.params = parameters
-
-        # total cost and utility
         self.totalDiscountedCost = 0
         self.totalDiscountedUtility = 0
 
-    def update(self, time, current_state):
-        """ updates the discounted total cost and health utility
-        :param time: simulation time
-        :param current_state: current health state
-        """
+    def update(self, time, current_state, next_state):
 
-        # cost and utility (per unit of time) during the period since the last recording until now
-        cost = self.params.annualStateCosts[current_state.value] + self.params.annualTreatmentCost
-        utility = self.params.annualStateUtilities[current_state.value]
+        # cost (per unit of time) during the period since the last recording until now
+        cost = self.params.annualStateCosts[current_state.value]
+        if current_state == HealthStates.CANCER_TREATMENT:
+            cost += self.params.cancerTreatmentCost
+        if current_state == HealthStates.PRE_CANCER_TREATMENT:
+            cost += self.params.precancerTreatmentCost
 
         # discounted cost and utility (continuously compounded)
         discounted_cost = Econ.pv_continuous_payment(payment=cost,
                                                      discount_rate=self.params.discountRate,
                                                      discount_period=(self.tLastRecorded, time))
+
+
+
+        # utility (per unit of time) during the period since the last recording until now
+        utility = self.params.annualStateUtilities[current_state.value]
         discounted_utility = Econ.pv_continuous_payment(payment=utility,
                                                         discount_rate=self.params.discountRate,
                                                         discount_period=(self.tLastRecorded, time))
@@ -166,31 +150,21 @@ class Cohort:
 class CohortOutcomes:
     def __init__(self):
 
-        self.survivalTimes = []         # patients' survival times
-        self.timesToCancer = []           # patients' times to Cancer
-        self.nCancers = []              # number of Cancer cases
-        self.costs = []                 # patients' discounted costs
-        self.utilities =[]              # patients' discounted utilities
-        self.nLivingPatients = None     # survival curve (sample path of number of alive patients over time)
-
-        self.statSurvivalTime = None    # summary statistics for survival time
-        self.statTimeToCancer = None      # summary statistics for time to Cancer
-        self.statNumCancer = None       # summary statistics for number of Cancer cases
-        self.statCost = None            # summary statistics for discounted cost
-        self.statUtility = None         # summary statistics for discounted utility
+        self.survivalTimes = []
+        self.nLivingPatients = None
+        self.costs = []
+        self.utilities = []
+        self.statSurvivalTime = None
+        self.statCost = None
+        self.statUtility = None
 
     def extract_outcome(self, simulated_patient):
         """ extracts outcomes of a simulated patient
         :param simulated_patient: a simulated patient"""
 
-        # record survival time and time until Cancer
-        if simulated_patient.stateMonitor.survivalTime is not None:
+        # record survival time
+        if not (simulated_patient.stateMonitor.survivalTime is None):
             self.survivalTimes.append(simulated_patient.stateMonitor.survivalTime)
-        if simulated_patient.stateMonitor.timeToCancer is not None:
-            self.timesToCancer.append(simulated_patient.stateMonitor.timeToCancer)
-        if simulated_patient.stateMonitor.nCancer is not None:
-            self.nCancers.append(simulated_patient.stateMonitor.nCancers)
-        # discounted cost and discounted utility
         self.costs.append(simulated_patient.stateMonitor.costUtilityMonitor.totalDiscountedCost)
         self.utilities.append(simulated_patient.stateMonitor.costUtilityMonitor.totalDiscountedUtility)
 
@@ -200,11 +174,10 @@ class CohortOutcomes:
         """
 
         # summary statistics
-        self.statSurvivalTime = Stat.SummaryStat(name='Survival time', data=self.survivalTimes)
-        self.statTimeToCancer = Stat.SummaryStat(name='Time until Cervical Cancer', data=self.timesToCancer)
-        self.statNumCancer = Stat.SummaryStat(name = 'Total Number of Cancer Cases', data=self.nCancers)
-        self.statCost = Stat.SummaryStat(name='Discounted cost', data=self.costs)
-        self.statUtility = Stat.SummaryStat(name='Discounted utility', data=self.utilities)
+
+        self.statSurvivalTime = Stat.SummaryStat(name='Survival Time', data=self.survivalTimes)
+        self.statCost = Stat.SummaryStat(name='Discounted Cost', data=self.costs)
+        self.statUtility = Stat.SummaryStat(name='Discounted Utility', data=self.utilities)
 
         # survival curve
         self.nLivingPatients = Path.PrevalencePathBatchUpdate(

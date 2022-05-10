@@ -5,16 +5,16 @@ import Support as Support
 import SimPy.Plots.SamplePaths as Path
 import SimPy.Plots.Histogram as Hist
 
-#select therapy
-therapy = P.Treatment.HPV_SCREEN
+# selected therapy
+treatment = D.Treatment.HPV_SCREEN
 
 # create a cohort
 myCohort = Cls.Cohort(id=1,
                       pop_size=D.POP_SIZE,
-                      Treatment=P.Treatment.HPV_SCREEN)
+                      parameters=P.Parameters(treatment=treatment))
 
 # simulate the cohort over the specified time steps
-myCohort.simulate(n_time_steps=D.SIM_TIME_STEPS)
+myCohort.simulate(sim_length=D.SIMULATION_LENGTH)
 
 # plot the sample path (survival curve)
 Path.plot_sample_path(
@@ -23,22 +23,7 @@ Path.plot_sample_path(
     x_label='Time-Step (Year)',
     y_label='Number Survived')
 
-# plot the histogram of survival times
-Hist.plot_histogram(
-    data=myCohort.cohortOutcomes.survivalTimes,
-    title='Histogram of Patient Survival Time',
-    x_label='Survival Time (Year)',
-    y_label='Count',
-    bin_width=1)
 
-# plot the histogram of number of cancer cases
-Hist.plot_histogram(
-    data=myCohort.cohortOutcomes.nCancers,
-    title='Histogram of Number of Cancer Cases',
-    x_label='Number of Cancer Cases',
-    y_label='Count',
-    bin_width=1)
 
 # print the outcomes of this simulated cohort
-Support.print_outcomes(sim_outcomes=myCohort.cohortOutcomes,
-                       therapy_name=therapy)
+Support.print_outcomes(sim_outcomes=myCohort.cohortOutcomes,treatment_name=treatment)
