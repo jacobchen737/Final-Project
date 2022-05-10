@@ -16,8 +16,14 @@ def print_outcomes(sim_outcomes, therapy_name):
                                          alpha=D.ALPHA,
                                          deci=2)
 
-    # mean and confidence interval text of time to AIDS
-    time_to_HIV_death_CI_text = sim_outcomes.statTimeToAIDS\
+    # mean and confidence interval text of time to cancer
+    time_to_Cancer_death_CI_text = sim_outcomes.statTimeToCancer\
+        .get_formatted_mean_and_interval(interval_type='c',
+                                         alpha=D.ALPHA,
+                                         deci=2)
+
+    # mean and confidence interval text of cancer cases
+    num_cancer_mean_CI_text = sim_outcomes.statNumCancer\
         .get_formatted_mean_and_interval(interval_type='c',
                                          alpha=D.ALPHA,
                                          deci=2)
@@ -39,8 +45,10 @@ def print_outcomes(sim_outcomes, therapy_name):
     print(therapy_name)
     print("  Estimate of mean survival time and {:.{prec}%} confidence interval:".format(1 - D.ALPHA, prec=0),
           survival_mean_CI_text)
-    print("  Estimate of mean time to AIDS and {:.{prec}%} confidence interval:".format(1 - D.ALPHA, prec=0),
-          time_to_HIV_death_CI_text)
+    print("  Estimate of mean time to cancer and {:.{prec}%} confidence interval:".format(1 - D.ALPHA, prec=0),
+          time_to_Cancer_death_CI_text)
+    print("  Estimate of mean number of cancer cases and {:.{prec}%} confidence interval:".format(1 - D.ALPHA, prec=0),
+          num_cancer_mean_CI_text)
     print("  Estimate of discounted cost and {:.{prec}%} confidence interval:".format(1 - D.ALPHA, prec=0),
           cost_mean_CI_text)
     print("  Estimate of discounted utility and {:.{prec}%} confidence interval:".format(1 - D.ALPHA, prec=0),
@@ -107,6 +115,21 @@ def print_comparative_outcomes(sim_outcomes_mono, sim_outcomes_combo):
                                                                          alpha=D.ALPHA,
                                                                          deci=2)
     print("Increase in mean survival time and {:.{prec}%} confidence interval:"
+          .format(1 - D.ALPHA, prec=0),
+          estimate_CI)
+
+    # change in number of cancer cases
+    increase_number_cancer = Stat.DifferenceStatIndp(
+        name='change in number of cancer cases',
+        x=sim_outcomes_combo.nCancers,
+        y_ref=sim_outcomes_mono.nCancers)
+
+    # estimate and CI
+    estimate_CI = increase_number_cancer.get_formatted_mean_and_interval(interval_type='c',
+                                                                          alpha=D.ALPHA,
+                                                                          deci=2)
+
+    print("Change in the number of cancer cases and {:.{prec}%} confidence interval:"
           .format(1 - D.ALPHA, prec=0),
           estimate_CI)
 
@@ -187,13 +210,13 @@ def report_CEA_CBA(sim_outcomes_mono, sim_outcomes_combo):
         file_name='CETable.csv')
 
     # CBA
-    NBA = Econ.CBA(
+    CBA = Econ.CBA(
         strategies=[mono_therapy_strategy, combo_therapy_strategy],
         wtp_range=[0, 50000],
         if_paired=False
     )
     # show the net monetary benefit figure
-    NBA.plot_incremental_nmbs(
+    CBA.plot_incremental_nmbs(
         title='Cost-Benefit Analysis',
         x_label='Willingness-to-pay per QALY ($)',
         y_label='Incremental Net Monetary Benefit ($)',

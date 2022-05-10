@@ -5,6 +5,8 @@ import Support as Support
 import SimPy.Plots.SamplePaths as Path
 import SimPy.Plots.Histogram as Hist
 
+#select therapy
+therapy = P.Treatment.HPV_SCREEN
 
 # create a cohort
 myCohort = Cls.Cohort(id=1,
@@ -26,6 +28,14 @@ Hist.plot_histogram(
     data=myCohort.cohortOutcomes.survivalTimes,
     title='Histogram of Patient Survival Time',
     x_label='Survival Time (Year)',
+    y_label='Count',
+    bin_width=1)
+
+# plot the histogram of number of cancer cases
+Hist.plot_histogram(
+    data=myCohort.cohortOutcomes.nCancers,
+    title='Histogram of Number of Cancer Cases',
+    x_label='Number of Cancer Cases',
     y_label='Count',
     bin_width=1)
 
