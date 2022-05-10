@@ -1,9 +1,11 @@
 import numpy as np
+
 import SimPy.EconEval as Econ
 import SimPy.Markov as Markov
 import SimPy.SamplePath as Path
 import SimPy.Statistics as Stat
 from InputData import HealthStates
+
 
 class Patient:
     def __init__(self, id, parameters):
@@ -54,7 +56,7 @@ class PatientStateMonitor:
 
         self.currentState = parameters.initialHealthState    # assuming everyone starts in "Well"
         self.survivalTime = None
-        #self.nStrokes = 0
+        self.nCancer = 0
         self.costUtilityMonitor = PatientCostUtilityMonitor(parameters=parameters)
 
     def update(self, time, new_state):
@@ -62,6 +64,8 @@ class PatientStateMonitor:
         if new_state in (HealthStates.CANCER_DEATH, HealthStates.OTHER_DEATH):
             self.survivalTime = time
 
+        if new_state == HealthStates.CANCER:
+            self.nCancer += 1
 
         self.costUtilityMonitor.update(time=time,
                                        current_state=self.currentState,
@@ -149,8 +153,9 @@ class Cohort:
 
 class CohortOutcomes:
     def __init__(self):
-
+        self.statNumCancer = None
         self.survivalTimes = []
+        self.nTotalCancer = []
         self.nLivingPatients = None
         self.costs = []
         self.utilities = []
@@ -165,6 +170,7 @@ class CohortOutcomes:
         # record survival time
         if not (simulated_patient.stateMonitor.survivalTime is None):
             self.survivalTimes.append(simulated_patient.stateMonitor.survivalTime)
+        self.nTotalCancer.append(simulated_patient.stateMonitor.nCancer)
         self.costs.append(simulated_patient.stateMonitor.costUtilityMonitor.totalDiscountedCost)
         self.utilities.append(simulated_patient.stateMonitor.costUtilityMonitor.totalDiscountedUtility)
 
@@ -174,7 +180,7 @@ class CohortOutcomes:
         """
 
         # summary statistics
-
+        self.statNumCancer = Stat.SummaryStat(name='Number of strokes', data=self.nTotalCancer)
         self.statSurvivalTime = Stat.SummaryStat(name='Survival Time', data=self.survivalTimes)
         self.statCost = Stat.SummaryStat(name='Discounted Cost', data=self.costs)
         self.statUtility = Stat.SummaryStat(name='Discounted Utility', data=self.utilities)

@@ -6,7 +6,7 @@ import SimPy.Plots.SamplePaths as Path
 import SimPy.Plots.Histogram as Hist
 
 # selected therapy
-treatment = D.Treatment.HPV_SCREEN
+treatment = D.Treatment.CRYT_SCREEN
 
 # create a cohort
 myCohort = Cls.Cohort(id=1,

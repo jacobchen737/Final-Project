@@ -7,10 +7,9 @@ SIMULATION_LENGTH = 50    # length of simulation (years)
 ALPHA = 0.05        # significance level for calculating confidence intervals
 DISCOUNT = 0.03     # annual discount rate
 class Treatment(Enum):
-    NONE = 0
-    HPV_SCREEN = 1
-    CRYT_SCREEN = 2
-    DUAL_SCREEN = 3
+    HPV_SCREEN = 0
+    CRYT_SCREEN = 1
+    DUAL_SCREEN = 2
 
 class HealthStates(Enum):
     WELL = 0
@@ -27,7 +26,7 @@ class HealthStates(Enum):
 HPV_SCREEN_RR = 0.9260
 CRYT_SCREEN_RR = 0.75
 DUAL_SCREEN_RR = 0.9370
-SCREEN_RR = 0
+
 
 # annual cost of each health state
 ANNUAL_STATE_COST_SCREENING = [
@@ -41,13 +40,7 @@ ANNUAL_STATE_COST_SCREENING = [
     0,     # CANCER_DEATH
     0,     # OTHER_DEATH
     ]
-ANNUAL_STATE_COST_NOSCREENING = [
-    0,     # WELL
-    1000,     # CANCER
-    0,   # CANCER_TREATMENT
-    0,     # CANCER_DEATH
-    0,     # OTHER_DEATH
-    ]
+
 
 
 
@@ -67,6 +60,7 @@ CANCERTREATMENT_DURATION = 1/2
 HPV_SCREEN_FREQUENCY = 1/5
 CRYT_SCREEN_FREQUENCY = 1/3
 DUAL_SCRREN_FREQUENCE = 1/5
+NO_SCREEN_FREQUENCE = 1/3
 
 
 
@@ -134,27 +128,17 @@ def get_trans_rate_matrix(with_treatment):
     lambda12 = 1/CANCERTREATMENT_DURATION
 
 
-
-    if with_treatment == Treatment.NONE:
-        rate_matrix = [
-            [0, lambda2, 0, 0, lambda0],   # WELL
-            [0, 0, lambda12, 0, 0],   # CANCER TREATMENT
-            [0, 0, 0, lambda5, 0],   # CANCER
-            [0, 0, 0, 0, 0],   # CANCER_DEATH
-            [0, 0, 0, 0, 0]    # OTHER_DEATH
-            ]
-    else:
-        rate_matrix = [
-        [0, lambda13, lambda1, 0, 0, lambda2, 0, 0, lambda0],  # WELL
-        [lambda9/rr, 0, 0, lambda6*rr, 0, 0, lambda7*rr, 0, lambda0*(1/SCREEN_DURATION)*rr],  # WELL_SCREENING
-        [0, 0, 0, 0, lambda13, lambda4, 0, 0, lambda0],  # PRE_CANCER
-        [0, 0, 0, 0, lambda11/rr, 0, lambda10*rr, 0, lambda0*(1/SCREEN_DURATION)*rr],  # PRE_CANCER_SCREENING
-        [lambda3, 0, 0, 0, 0, 0, 0, 0, lambda0*(1/PRECANCERTREATMENT_DURATION)],  # PRE_CANCER_TREATMENT
-        [0, 0, 0, 0, 0, 0, 0, lambda5, 0],  # CANCER
-        [0, 0, 0, 0, 0, lambda12, 0, 0, 0],  # CANCER_TREATMENT
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],  # CANCER_DEATH
-        [0, 0, 0, 0, 0, 0, 0, 0, 0]  # OTHER_DEATH
-        ]
+    rate_matrix = [
+    [0, lambda13, lambda1, 0, 0, lambda2, 0, 0, lambda0],  # WELL
+    [lambda9/rr, 0, 0, 0, lambda6*rr, 0, lambda7*rr, 0, lambda0*(1/SCREEN_DURATION)*rr],  # WELL_SCREENING
+    [0, 0, 0, 0, lambda13, lambda4, 0, 0, lambda0],  # PRE_CANCER
+    [0, 0, 0, 0, lambda11/rr, 0, lambda10*rr, 0, lambda0*(1/SCREEN_DURATION)*rr],  # PRE_CANCER_SCREENING
+    [lambda3, 0, 0, 0, 0, 0, 0, 0, lambda0*(1/PRECANCERTREATMENT_DURATION)],  # PRE_CANCER_TREATMENT
+    [0, 0, 0, 0, 0, 0, 0, lambda5, 0],  # CANCER
+    [0, 0, 0, 0, 0, lambda12, 0, 0, 0],  # CANCER_TREATMENT
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],  # CANCER_DEATH
+    [0, 0, 0, 0, 0, 0, 0, 0, 0]  # OTHER_DEATH
+    ]
     return rate_matrix
 
 
@@ -164,12 +148,12 @@ def get_trans_rate_matrix(with_treatment):
 # annual health utility of each health state
 ANNUAL_STATE_UTILITY = [
      1,  # WELL
-     0,  # WELL_SCREENING
-     0.9,  # PRE_CANCER
-     0,  # PRE_CANCER_SCREENING
-     0,  # PRE_CANCER_TREATMENT (cost of colposcopy)
-     0.2,  # CANCER
-     0.2,  # CANCER_TREATMENT
+     1,  # WELL_SCREENING
+     0.6,  # PRE_CANCER
+     0.6,  # PRE_CANCER_SCREENING
+     0.5,  # PRE_CANCER_TREATMENT (cost of colposcopy)
+     0.1,  # CANCER
+     0.1,  # CANCER_TREATMENT
      0,  # CANCER_DEATH
      0,  # OTHER_DEATH
  ]

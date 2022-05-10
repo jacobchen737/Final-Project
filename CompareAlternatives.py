@@ -31,7 +31,7 @@ cohort_dual = Cls.Cohort(id=2,
 
 cohort_dual.simulate(sim_length=D.SIMULATION_LENGTH)
 
-# print the estimates for the mean survival time and mean time to AIDS
+# print the estimates for the mean survival time and mean time to Cancer
 
 Support.print_outcomes(sim_outcomes=cohort_hpv.cohortOutcomes,
                        treatment_name=D.Treatment.HPV_SCREEN)

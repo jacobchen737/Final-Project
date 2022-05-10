@@ -12,15 +12,12 @@ class Parameters:
         # initial health state
         self.initialHealthState = Data.HealthStates.WELL
         # annual state costs and utilities
-        if self.treatment == Data.Treatment.NONE:
-            self.annualStateCosts = Data.ANNUAL_STATE_COST_NOSCREENING
-        else:
-            self.annualStateCosts = Data.ANNUAL_STATE_COST_SCREENING
+
+        self.annualStateCosts = Data.ANNUAL_STATE_COST_SCREENING
 
         # discount rate
         self.discountRate = Data.DISCOUNT
 
-        self.transRateMatrix = []
         self.transRateMatrix = Data.get_trans_rate_matrix(with_treatment=treatment)
 
         #  transition rate matrices
