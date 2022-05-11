@@ -71,6 +71,25 @@ def plot_survival_curves_and_histograms(sim_outcomes_1, treatment1, sim_outcomes
         legends=[treatment1, treatment2],
         color_codes=[color1, color2]
     )
+    # histograms of survival times
+    set_of_survival_times = [
+        sim_outcomes_1.survivalTimes,
+        sim_outcomes_2.survivalTimes
+    ]
+
+    # graph histograms
+    Hist.plot_histograms(
+        data_sets=set_of_survival_times,
+        title='Histogram of patient survival time',
+        x_label='Survival time (year)',
+        y_label='Counts',
+        bin_width=1,
+        legends=[treatment1, treatment2],
+        color_codes=['green', 'blue'],
+        transparency=0.6
+    )
+
+
 # histograms of cancer times
     set_of_cancer = [
         sim_outcomes_1.nTotalCancer,
@@ -85,7 +104,7 @@ def plot_survival_curves_and_histograms(sim_outcomes_1, treatment1, sim_outcomes
         y_label='Counts',
         bin_width=1,
         legends=[treatment1, treatment2],
-        color_codes=[color1, color2],
+        color_codes=['green', 'blue'],
         transparency=0.6
     )
 
@@ -208,3 +227,5 @@ def report_CEA_CBA(sim_outcomes_hpv, sim_outcomes_cryt):
         show_legend=True,
         figure_size=(6, 5)
     )
+
+

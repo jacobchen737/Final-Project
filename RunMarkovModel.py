@@ -1,9 +1,9 @@
 import InputData as D
-import ParameterClasses as P
 import MarkovModelClasses as Cls
-import Support as Support
-import SimPy.Plots.SamplePaths as Path
+import ParameterClasses as P
 import SimPy.Plots.Histogram as Hist
+import SimPy.Plots.SamplePaths as Path
+import Support as Support
 
 # selected therapy
 treatment = D.Treatment.HPV_SCREEN
@@ -23,7 +23,13 @@ Path.plot_sample_path(
     x_label='Time-Step (Year)',
     y_label='Number Survived')
 
-
+# plot the histogram of survival times
+Hist.plot_histogram(
+    data=myCohort.cohortOutcomes.nTotalCancer,
+    title='Histogram of Patient Total Strokes',
+    x_label='Survival Time (Year)',
+    y_label='Count',
+    bin_width=1)
 
 # print the outcomes of this simulated cohort
 Support.print_outcomes(sim_outcomes=myCohort.cohortOutcomes,treatment_name=treatment)

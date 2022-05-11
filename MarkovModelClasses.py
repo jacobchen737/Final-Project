@@ -180,7 +180,7 @@ class CohortOutcomes:
         """
 
         # summary statistics
-        self.statNumCancer = Stat.SummaryStat(name='Number of cancer cases', data=self.nTotalCancer)
+        self.statNumCancer = Stat.SummaryStat(name='Number of strokes', data=self.nTotalCancer)
         self.statSurvivalTime = Stat.SummaryStat(name='Survival Time', data=self.survivalTimes)
         self.statCost = Stat.SummaryStat(name='Discounted Cost', data=self.costs)
         self.statUtility = Stat.SummaryStat(name='Discounted Utility', data=self.utilities)
