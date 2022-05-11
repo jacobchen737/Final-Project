@@ -57,8 +57,8 @@ def plot_survival_curves_and_histograms(sim_outcomes_hpv,sim_outcomes_cryt):
         title='Survival curve',
         x_label='Simulation time step (year)',
         y_label='Number of alive patients',
-        legends=['HPV','CRYT'],
-        color_codes=['blue','yellow']
+        legends=['HPV','DUAL'],
+        color_codes=['blue','red']
     )
 # histograms of cancer times
     set_of_cancer = [
@@ -69,13 +69,13 @@ def plot_survival_curves_and_histograms(sim_outcomes_hpv,sim_outcomes_cryt):
     # graph histograms
     Hist.plot_histograms(
         data_sets=set_of_cancer,
-        title='Histogram of patient cancer number',
-        x_label='Number of Cancer',
+        title='Histogram of New Cancer Cases',
+        x_label='',
         y_label='Counts',
         bin_width=1,
-        legends=['with Hpv', 'With Cryt'],
-        color_codes=['green', 'blue'],
-        transparency=0.6
+        legends=['HPV', 'DUAL'],
+        color_codes=['green', 'purple'],
+        transparency=1
     )
 
 def print_comparative_outcomes(sim_outcomes_hpv, sim_outcomes_cryt):

@@ -43,14 +43,14 @@ Support.print_outcomes(sim_outcomes=cohort_dual.cohortOutcomes,
 # plot survival curves and histograms
 Support.plot_survival_curves_and_histograms(
                                             sim_outcomes_hpv=cohort_hpv.cohortOutcomes,
-                                            sim_outcomes_cryt=cohort_cryt.cohortOutcomes)
+                                            sim_outcomes_cryt=cohort_dual.cohortOutcomes)
 
 
 # print comparative outcomes
 Support.print_comparative_outcomes(sim_outcomes_hpv=cohort_hpv.cohortOutcomes,
-                                   sim_outcomes_cryt=cohort_cryt.cohortOutcomes)
+                                   sim_outcomes_cryt=cohort_dual.cohortOutcomes)
 
 
 # report the CEA results
 Support.report_CEA_CBA(sim_outcomes_hpv=cohort_hpv.cohortOutcomes,
-                       sim_outcomes_cryt=cohort_cryt.cohortOutcomes)
+                       sim_outcomes_cryt=cohort_dual.cohortOutcomes)
