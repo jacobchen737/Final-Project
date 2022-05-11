@@ -2,7 +2,6 @@ from enum import Enum
 import numpy as np
 import InputData as Data
 
-
 class Parameters:
     def __init__(self, treatment):
 
