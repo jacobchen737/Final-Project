@@ -39,7 +39,7 @@ def print_outcomes(sim_outcomes, treatment_name):
     print("")
 
 
-def plot_survival_curves_and_histograms(sim_outcomes_hpv,sim_outcomes_cryt):
+def plot_survival_curves_and_histograms(sim_outcomes_1, treatment1, sim_outcomes_2, treatment2):
     """ draws the survival curves and the histograms of time until HIV deaths
     :param sim_outcomes_hpv: outcomes of a cohort simulated under hpv therapy
     :param sim_outcomes_: outcomes of a cohort simulated under cryt therapy
@@ -47,50 +47,68 @@ def plot_survival_curves_and_histograms(sim_outcomes_hpv,sim_outcomes_cryt):
 
     # get survival curves of both treatments
     survival_curves = [
-        sim_outcomes_hpv.nLivingPatients,
-        sim_outcomes_cryt.nLivingPatients
+        sim_outcomes_1.nLivingPatients,
+        sim_outcomes_2.nLivingPatients
     ]
-
+    if treatment1 == D.Treatment.CRYT_SCREEN:
+        color1 = 'green'
+    if treatment1 == D.Treatment.HPV_SCREEN:
+        color1 = 'blue'
+    if treatment1 == D.Treatment.DUAL_SCREEN:
+        color1 = 'red'
+    if treatment2 == D.Treatment.CRYT_SCREEN:
+        color2 = 'green'
+    if treatment2 == D.Treatment.HPV_SCREEN:
+        color2 = 'blue'
+    if treatment2 == D.Treatment.DUAL_SCREEN:
+        color2 = 'red'
     # graph survival curve
     Path.plot_sample_paths(
         sample_paths=survival_curves,
         title='Survival curve',
         x_label='Simulation time step (year)',
         y_label='Number of alive patients',
-        legends=['HPV','DUAL'],
-        color_codes=['blue','red']
+        legends=[treatment1, treatment2],
+        color_codes=[color1, color2]
     )
 # histograms of cancer times
     set_of_cancer = [
-        sim_outcomes_hpv.nTotalCancer,
-        sim_outcomes_cryt.nTotalCancer
+        sim_outcomes_1.nTotalCancer,
+        sim_outcomes_2.nTotalCancer
     ]
 
     # graph histograms
     Hist.plot_histograms(
         data_sets=set_of_cancer,
-        title='Histogram of New Cancer Cases',
-        x_label='',
+        title='Histogram of patient cancer number',
+        x_label='Number of Cancer',
         y_label='Counts',
         bin_width=1,
-        legends=['HPV', 'DUAL'],
-        color_codes=['green', 'purple'],
-        transparency=1
+        legends=[treatment1, treatment2],
+        color_codes=[color1, color2],
+        transparency=0.6
     )
 
-def print_comparative_outcomes(sim_outcomes_hpv, sim_outcomes_cryt):
+def print_comparative_outcomes(sim_outcomes_1,
+                               treatment1,
+                               sim_outcomes_2,
+                               treatment2):
 
     """ prints average increase in survival time, discounted cost, and discounted utility
     under combination therapy compared to mono therapy
     :param sim_outcomes_mono: outcomes of a cohort simulated under mono therapy
     :param sim_outcomes_combo: outcomes of a cohort simulated under combination therapy
     """
+    print("Compare ",
+          treatment1,
+          " vs ",
+          treatment2)
 
     # increase in mean survival time under combination therapy with respect to mono therapy
     increase_survival_time = Stat.DifferenceStatIndp(
         name='Increase in mean survival time',
-        x=sim_outcomes_hpv.survivalTimes,
-        y_ref=sim_outcomes_cryt.survivalTimes)
+        x=sim_outcomes_1.survivalTimes,
+        y_ref=sim_outcomes_2.survivalTimes)
 
     # estimate and CI
     estimate_CI = increase_survival_time.get_formatted_mean_and_interval(interval_type='c',
@@ -103,15 +121,15 @@ def print_comparative_outcomes(sim_outcomes_hpv, sim_outcomes_cryt):
     # increase in mean discounted cost under combination therapy with respect to mono therapy
     increase_discounted_cost = Stat.DifferenceStatIndp(
         name='Increase in mean discounted cost',
-        x=sim_outcomes_cryt.costs,
-        y_ref=sim_outcomes_hpv.costs)
+        x=sim_outcomes_1.costs,
+        y_ref=sim_outcomes_2.costs)
 
     # estimate and CI
     estimate_CI = increase_discounted_cost.get_formatted_mean_and_interval(interval_type='c',
                                                                            alpha=D.ALPHA,
                                                                            deci=2,
                                                                            form=',')
-    print("Decrease in mean discounted cost and {:.{prec}%} confidence interval:"
+    print("Increase in mean discounted cost and {:.{prec}%} confidence interval:"
           .format(1 - D.ALPHA, prec=0),
           estimate_CI)
 
@@ -119,8 +137,8 @@ def print_comparative_outcomes(sim_outcomes_hpv, sim_outcomes_cryt):
 
     increase_discounted_utility = Stat.DifferenceStatIndp(
         name='Increase in mean discounted utility',
-        x=sim_outcomes_cryt.utilities,
-        y_ref=sim_outcomes_hpv.utilities)
+        x=sim_outcomes_1.utilities,
+        y_ref=sim_outcomes_2.utilities)
 
     # estimate and CI
     estimate_CI = increase_discounted_utility.get_formatted_mean_and_interval(interval_type='c',
@@ -161,10 +179,10 @@ def report_CEA_CBA(sim_outcomes_hpv, sim_outcomes_cryt):
         title='Cost-Effectiveness Analysis',
         x_label='Additional QALYs',
         y_label='Additional Cost',
-        interval_type='c',
-        x_range=(-0.5, 1),
-        y_range=(-1000, 10000)
+        x_range=(0,10),
+        y_range=(10, 2000)
     )
+
 
     # report the CE table
     CEA.build_CE_table(
@@ -178,7 +196,7 @@ def report_CEA_CBA(sim_outcomes_hpv, sim_outcomes_cryt):
     # CBA
     NBA = Econ.CBA(
         strategies=[hpv_therapy_strategy, cryt_therapy_strategy],
-        wtp_range=[0, 50000],
+        wtp_range=[0, 5000],
         if_paired=False
     )
     # show the net monetary benefit figure
@@ -190,4 +208,3 @@ def report_CEA_CBA(sim_outcomes_hpv, sim_outcomes_cryt):
         show_legend=True,
         figure_size=(6, 5)
     )
-
