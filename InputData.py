@@ -74,9 +74,9 @@ SCREEN_DURATION = 1/365  # 1 day
 PRECANCERTREATMENT_DURATION = 1/365 # 1 day for colposcopy
 CANCERTREATMENT_DURATION = 2  # 2 years
 
-HPV_SCREEN_FREQUENCY = 1/5
-CRYT_SCREEN_FREQUENCY = 1/3
-DUAL_SCRREN_FREQUENCE = 1/5
+HPV_SCREEN_FREQUENCY = 5
+CRYT_SCREEN_FREQUENCY = 3
+DUAL_SCRREN_FREQUENCE = 5
 
 def get_trans_rate_matrix(with_treatment):
     """
@@ -171,7 +171,6 @@ def get_trans_rate_matrix(with_treatment):
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # OTHER_DEATH
         ]
     return rate_matrix
-
 
 # annual health utility of each health state
 ANNUAL_STATE_UTILITY = [
