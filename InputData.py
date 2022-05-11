@@ -172,7 +172,6 @@ def get_trans_rate_matrix(with_treatment):
         ]
     return rate_matrix
 
-
 # annual health utility of each health state
 ANNUAL_STATE_UTILITY = [
      1,  # WELL
